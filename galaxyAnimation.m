@@ -3,10 +3,14 @@ clc;
 
 %% parameters
 L = 1;% Galaxy size
-N = 2000; % number of stars
+N = 4000; % number of stars
 starDistr = 2;  % start distribution:  1=uniform, 2=gaussian
-
+N_animSteps = 200;
+Ts = 0.1;
 centerDensity = 1; % only for starDistr=2
+armDensity = 0.4; % [0,1]
+armProm = 10; % arm prominence
+N_arms = 4;
 
 %% generate initial conditions
 if starDistr == 1
@@ -27,14 +31,30 @@ if starDistr == 1
     phi = atan2(y,x);
     
 elseif starDistr == 2
-    randVec(1,:) = randn(1,N)/3;
-    randVec(2,:) = rand(1,N)*2*pi;
+    randVec(1,:) = abs(randn(1,N)/3);
+    help = 2*pi*rand(1,round(N*(1-armDensity)));
+    for k=1:N_arms-1
+        help = [help, (1/armProm*asin(2*(rand(1,round(N*armDensity/N_arms))-0.5))+pi/2+2*pi/N_arms*(k-1))];
+    end
+    help = [help, (1/armProm*asin(2*(rand(1,round(N*armDensity/N_arms))-0.5))+pi/2+2*pi/N_arms*(N_arms-1))];
+    try
+        randVec(2,:) = [help, (1/armProm*asin(2*(rand(1,round(N*armDensity/N_arms))-0.5))+pi/2+2*pi/N_arms*(N_arms-1))];
+    catch
+        help = [help, (1/armProm*asin(2*(rand(1,round(N*armDensity/N_arms))-0.5))+pi/2+2*pi/N_arms*(N_arms-1))];
+        if numel(help) > N
+            help(N+1:end) = [];
+            randVec(2,:) = help;
+        elseif numel(help) < N
+            help(end+1:end+(N-numel(help))) = 2*pi*rand(1,N-numel(help));
+            randVec(2,:) = help;
+        end
+    end
 
     r = randVec(1,:)/centerDensity*L;
     phi = randVec(2,:);
     subplot(211); hist(r,100);
-    subplot(212); hist(phi,100)
-    
+    subplot(212); hist(phi,100); xlim([0,2*pi])
+    a = 5;
 else
     error('Wrong type of star distribution')
 end
@@ -44,7 +64,7 @@ end
 %% plotting
 close all
 figure(1)
-plot(r.*cos(phi),r.*sin(phi),'.w','Markersize',10)
+plot(r.*cos(phi),r.*sin(phi),'.w','Markersize',1)
 % plot(x,y,'.w','Markersize',10)
 set(gca,'color','k')
 xlim([-L,L])
@@ -67,8 +87,6 @@ end
 
 
 %% simulating a few time steps
-N_steps = 200;
-Ts = 0.1;
 L_plot = max(r);
 
 close all
@@ -80,7 +98,7 @@ xlim([-L_plot,L_plot])
 ylim([-L_plot,L_plot])
 axis equal
 hold all
-for k=1:N_steps
+for k=1:N_animSteps
 	phi = phi + Ts*omega; % euler forward
     set(plotHandle,'XData',r.*cos(phi),'YData',r.*sin(phi))
     xlim([-L_plot,L_plot])
