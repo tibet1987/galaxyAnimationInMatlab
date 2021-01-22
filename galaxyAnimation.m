@@ -5,7 +5,7 @@ clc;
 L = 1;% Galaxy size
 N = 10000; % number of stars
 starDistr = 2;  % start distribution:  1=uniform, 2=gaussian
-N_animSteps = 2000;
+N_animSteps = 5000;
 Ts = 0.03;
 centerDensity = 1; % only for starDistr=2
 armDensity = 0.4; % [0,1]
@@ -96,7 +96,7 @@ end
 L_plot = max(r);
 
 close all
-figure('color','k','position',[958    42   962   954])
+figure('color','k','position',[500          42        1420         954])
 plotHandle = plot(r.*cos(phi),r.*sin(phi),'.w','Markersize',1);
 % plot(x,y,'.w','Markersize',10)
 set(gca,'color','k')
