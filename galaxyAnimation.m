@@ -3,14 +3,16 @@ clc;
 
 %% parameters
 L = 1;% Galaxy size
-N = 4000; % number of stars
+N = 10000; % number of stars
 starDistr = 2;  % start distribution:  1=uniform, 2=gaussian
-N_animSteps = 200;
-Ts = 0.1;
+N_animSteps = 2000;
+Ts = 0.03;
 centerDensity = 1; % only for starDistr=2
 armDensity = 0.4; % [0,1]
 armProm = 10; % arm prominence
-N_arms = 4;
+N_arms = 3;
+
+speedFunction = 2; % 1=Kelper type speed function, 2=real star speed function
 
 %% generate initial conditions
 if starDistr == 1
@@ -75,7 +77,11 @@ axis equal
 %% velocity distribution function
 close all;
 d = 0:1/1000:1;
-calcOmega = @(x) 1./(x*10+1) .* ( 1 - 1./((2*x*10).^2+1) );
+if speedFunction == 1
+    calcOmega = @(x) 1/0.4 * 1./(x*10+1) .* ( 1 - 1./((2*x*10).^2+1) );
+else
+    calcOmega = @(x) 0.25*(log10(x+0.01)+4) - 0.3;
+end
 plot(d,calcOmega(d))
 
 
