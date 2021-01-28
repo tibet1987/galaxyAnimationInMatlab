@@ -6,7 +6,7 @@ L = 1;% Galaxy size
 N = 10000; % number of stars
 starDistr = 2;  % start distribution:  1=uniform, 2=gaussian
 N_animSteps = 5000;
-Ts = 0.03;
+Ts = 0.06;
 centerDensity = 1; % only for starDistr=2
 armDensity = 0.4; % [0,1]
 armProm = 10; % arm prominence
@@ -82,7 +82,7 @@ if speedFunction == 1
 else
     calcOmega = @(x) 0.25*(log10(x+0.01)+4) - 0.3;
 end
-plot(d,calcOmega(d))
+plot(d,calcOmega(d)), grid on;
 
 
 %% every particle gets a velocity according to the velocity distribution function
