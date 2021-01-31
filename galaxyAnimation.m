@@ -3,9 +3,9 @@ clc;
 
 %% parameters
 L = 1;% Galaxy size
-N = 10000; % number of stars
+N = 5000; % number of stars
 starDistr = 2;  % start distribution:  1=uniform, 2=gaussian
-N_animSteps = 5000;
+N_animSteps = 10000;
 Ts = 0.06;
 centerDensity = 1; % only for starDistr=2
 armDensity = 0.4; % [0,1]
@@ -13,6 +13,11 @@ armProm = 10; % arm prominence
 N_arms = 3;
 
 speedFunction = 2; % 1=Kelper type speed function, 2=real star speed function
+
+%% parameters for GIF animation
+gifname = 'galaxyAnimation.gif';
+createGIFimage = true;
+idx_start = 1;
 
 %% generate initial conditions
 if starDistr == 1
@@ -96,7 +101,7 @@ end
 L_plot = max(r);
 
 close all
-figure('color','k','position',[500          42        1420         954])
+figure('color','k','position',[500          42        640         480])
 plotHandle = plot(r.*cos(phi),r.*sin(phi),'.w','Markersize',1);
 % plot(x,y,'.w','Markersize',10)
 set(gca,'color','k')
@@ -111,4 +116,22 @@ for k=1:N_animSteps
     ylim([-L_plot,L_plot])
     drawnow
     pause(0.05)
+    
+    if createGIFimage
+        f = getframe(gcf);
+        if k==idx_start
+            [im,map] = rgb2ind(f.cdata,256,'nodither');
+        else
+            im(:,:,1,k-idx_start+1) = rgb2ind(f.cdata,map,'nodither');
+        end
+    end
+end
+
+%% export simulation to an animated gif
+if createGIFimage && ~isempty(gifname)
+    % save to fle
+%     imwrite(im,map,gifname,'DelayTime',Ts,'LoopCount',inf) %g443800
+    imwrite([im(:,:,1,1:1000),im(:,:,1,1000:-1:1)],map,gifname,'DelayTime',Ts,'LoopCount',inf) %g443800
+    alreadysaved = 1;
+    fprintf('done.\n');
 end
