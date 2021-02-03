@@ -1,4 +1,4 @@
-clear all, close all;
+clearvars, close all;
 clc;
 
 %% parameters
@@ -7,23 +7,17 @@ N = 5000; % number of stars
 starDistr = 2;  % start distribution:  1=uniform, 2=gaussian
 speedFunction = 2; % 1=Kelper type speed function, 2=real star speed function
 N_animSteps = 100;
-Ts = 0.06;
+Ts = 0.05;
+Ts_export = 0.05;
+exportScreenSize = [40 40 540 1110];
 centerDensity = 1; % only for starDistr=2
 armDensity = 0.4; % [0,1]
 armProm = 10; % arm prominence
 N_arms = 3;
 
-exportType = 1; % export to 1=GIF, 2=mpeg4
+exportType = 'video'; % export to 'gif' OR 'video'
+exportFileName = 'galaxyAnimation';
 
-%% parameters for export to MPEG4 or GIF 
-
-if exportType==1
-    gifname = 'galaxyAnimation.gif';
-    createGIFimage = true;
-    idx_start = 1;
-elseif exportType==2
-    
-end
 
 %% generate initial conditions -> distribute starts
 
@@ -49,22 +43,22 @@ elseif starDistr == 2           % starts distributed in a sinusoidal fashion to 
     %   1) generate a uniform distribution in radial direction -> randVec(1,:)
     %   2) generate a sinusoidal distribution in angular direction -> randVec(2,:)
     randVec(1,:) = abs(randn(1,N)/3);   % uniform distribution in radial direction
-    help = 2*pi*rand(1,round(N*(1-armDensity))); % start with a uniform distribution in angular direction
+    helpVar = 2*pi*rand(1,round(N*(1-armDensity))); % start with a uniform distribution in angular direction
     for k=1:N_arms-1
         % depending how many arms there are, generate a map from [0,2*pi) onto [-1,1]  
-        help = [help, (1/armProm*asin(2*(rand(1,round(N*armDensity/N_arms))-0.5))+ pi/2 + 2*pi/N_arms*(k-1))];
+        helpVar = [helpVar, (1/armProm*asin(2*(rand(1,round(N*armDensity/N_arms))-0.5))+ pi/2 + 2*pi/N_arms*(k-1))];
     end
-    help = [help, (1/armProm*asin(2*(rand(1,round(N*armDensity/N_arms))-0.5))+pi/2+2*pi/N_arms*(N_arms-1))];
+    helpVar = [helpVar, (1/armProm*asin(2*(rand(1,round(N*armDensity/N_arms))-0.5))+pi/2+2*pi/N_arms*(N_arms-1))];
     try
-        randVec(2,:) = [help, (1/armProm*asin(2*(rand(1,round(N*armDensity/N_arms))-0.5))+pi/2+2*pi/N_arms*(N_arms-1))];
+        randVec(2,:) = [helpVar, (1/armProm*asin(2*(rand(1,round(N*armDensity/N_arms))-0.5))+pi/2+2*pi/N_arms*(N_arms-1))];
     catch
-        help =         [help, (1/armProm*asin(2*(rand(1,round(N*armDensity/N_arms))-0.5))+pi/2+2*pi/N_arms*(N_arms-1))];
-        if numel(help) > N
-            help(N+1:end) = [];
-            randVec(2,:) = help;
-        elseif numel(help) < N
-            help(end+1:end+(N-numel(help))) = 2*pi*rand(1,N-numel(help));
-            randVec(2,:) = help;
+        helpVar =         [helpVar, (1/armProm*asin(2*(rand(1,round(N*armDensity/N_arms))-0.5))+pi/2+2*pi/N_arms*(N_arms-1))];
+        if numel(helpVar) > N
+            helpVar(N+1:end) = [];
+            randVec(2,:) = helpVar;
+        elseif numel(helpVar) < N
+            helpVar(end+1:end+(N-numel(helpVar))) = 2*pi*rand(1,N-numel(helpVar));
+            randVec(2,:) = helpVar;
         end
     end
 
@@ -112,7 +106,7 @@ end
 L_plot = max(r);
 
 close all
-figure('color','k','position',[500          42        640         480])
+figure('color','k','position',exportScreenSize)
 plotHandle = plot(r.*cos(phi),r.*sin(phi),'.w','Markersize',1);
 % plot(x,y,'.w','Markersize',10)
 set(gca,'color','k')
@@ -127,23 +121,18 @@ for k=1:N_animSteps
     ylim([-L_plot,L_plot])
     drawnow
     pause(0.05)
-    
-    exportImagesToGif( getframe(gcf), 'collect' );
-%     if exportType==1
-%         f = getframe(gcf);
-%         if k==idx_start
-%             [im,map] = rgb2ind(f.cdata,256,'nodither');
-%         else
-%             im(:,:,1,k-idx_start+1) = rgb2ind(f.cdata,map,'nodither');
-%         end
-%     end
+    if strcmpi(exportType,'gif')
+        exportImagesToGif( getframe(gcf), 'collect' );
+    elseif strcmpi(exportType,'video')
+        exportImagesToVideo( getframe(gcf), 'collect' , 'vidName', exportFileName, 'Ts', Ts_export);
+    end
 end
 
-[ gifFile ] = exportImagesToGif( getframe(gcf), 'finalize', 'Ts', Ts, 'loopCnt', inf, 'gifName', gifname );
-% if exportType==1
-%     %% export simulation to an animated gif
-%     % save to fle
-%     imwrite(im,map,gifname,'DelayTime',Ts,'LoopCount',inf) %g443800
-%     alreadysaved = 1;
-%     fprintf('done.\n');
-% end
+if strcmpi(exportType,'gif')
+    % store collected images into GIF file
+    [ gifFile ] = exportImagesToGif( getframe(gcf), 'finalize', 'Ts', Ts_export, 'loopCnt', inf, 'gifName', [exportFileName,'.gif'] );
+elseif strcmpi(exportType,'video')
+    % store collected images into mp4 file
+    exportImagesToVideo( getframe(gcf), 'finalize');
+end
+close all
