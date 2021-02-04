@@ -1,4 +1,4 @@
-clearvars, close all;
+clear all, close all;
 clc;
 
 %% parameters
@@ -6,14 +6,14 @@ L = 1;% Galaxy size
 N = 5000; % number of stars
 starDistr = 2;  % start distribution:  1=uniform, 2=gaussian
 speedFunction = 2; % 1=Kelper type speed function, 2=real star speed function
-N_animSteps = 100;
+N_animSteps = 300;
 Ts = 0.05;
 Ts_export = 0.05;
-exportScreenSize = [40 40 540 1110];
+exportScreenSize = [60 60 900 900];
 centerDensity = 1; % only for starDistr=2
 armDensity = 0.4; % [0,1]
 armProm = 10; % arm prominence
-N_arms = 3;
+N_arms = 2;
 
 exportType = 'video'; % export to 'gif' OR 'video'
 exportFileName = 'galaxyAnimation';

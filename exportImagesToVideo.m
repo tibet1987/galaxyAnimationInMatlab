@@ -15,6 +15,7 @@ function [ vidFile ] = exportImagesToVideo( figureHandle, mode, varargin )
 %                     'Ts'       - delay time between frames e.g. 0.05
 %                     'loopCnt'  - 'infinite', number of times
 %                     'vidName'  - name of the video file
+%                     'compRatio'- compression ratio (default is 10)
 %
 % output:
 %  gifFile       - gif output file combining all the images
@@ -51,6 +52,7 @@ if isempty(writerObj)
     end
     writerObj = VideoWriter(vidName,'MPEG-4'); % create a new video object
     writerObj.FrameRate = FrameRate;
+    writerObj.Quality = 100;
     open(writerObj); % open the newly created video object for writing
 %     f = getframe(figureHandle); % get first frame
     writeVideo(writerObj,figureHandle); % write first frame into file
