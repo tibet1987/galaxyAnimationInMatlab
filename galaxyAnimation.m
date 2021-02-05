@@ -13,9 +13,9 @@ exportScreenSize = [60 60 900 900];
 centerDensity = 1; % only for starDistr=2
 armDensity = 0.4; % [0,1]
 armProm = 10; % arm prominence
-N_arms = 2;
+N_arms = 3;
 
-exportType = 'video'; % export to 'gif' OR 'video'
+exportType = 'gif'; % export to 'gif' OR 'video'
 exportFileName = 'galaxyAnimation';
 
 
